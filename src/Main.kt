@@ -15,18 +15,18 @@ fun main() {
     // from Keys.kt
     val encToken = window.btoa(":$token")
 
-    with (XMLHttpRequest()) {
+    with(XMLHttpRequest()) {
         onload = {
             if (status == 200.toShort()) {
                 val res = JSON.parse<Json4Kotlin_Base>(responseText)
                 setTextForElement("counter", res.count)
 
-                res.value.forEach {
-                    setTextForElement("title", it.title)
-                    setTextForElement("author", it.createdBy.displayName)
-                    setTextForElement("date", getTimespan(it))
-                }
-
+                res.value
+                        .sortedWith(compareBy { getDiff(it.creationDate) })
+                        .reversed()
+                        .forEach {
+                            appendRow(getTimespan(it), it.createdBy.displayName, it.title)
+                        }
             }
         }
         open("GET", "https://dev.azure.com/dgsit/remote_control_android/_apis/git/pullrequests?api-version=5.0")
@@ -36,8 +36,19 @@ fun main() {
     }
 }
 
-private fun getTimespan(it: Value): String {
-    val diff = Date.now() - Date.parse(it.creationDate)
+private fun appendRow(date: String, author: String, title: String) {
+    val row = document.getElementById("pull-requests").asDynamic().insertRow(-1)
+    arrayOf(date, author, title).forEachIndexed { index, value ->
+        val cell = row.insertCell(index)
+        val text = document.createTextNode(value)
+        cell.appendChild(text)
+    }
+}
+
+private fun getDiff(creationDate: String): Double = Date.now() - Date.parse(creationDate)
+
+private fun getTimespan(value: Value): String {
+    val diff = Date.now() - Date.parse(value.creationDate)
     val seconds = diff / 1000
     val min = seconds / 60
     val hours = (min / 60).toInt()
