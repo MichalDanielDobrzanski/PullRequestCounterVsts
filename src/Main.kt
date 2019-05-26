@@ -15,12 +15,14 @@ fun main() {
     // from Keys.kt
     val encToken = window.btoa(":$token")
 
+
     with(XMLHttpRequest()) {
         onload = {
             if (status == 200.toShort()) {
                 val res = JSON.parse<Json4Kotlin_Base>(responseText)
                 setTextForElement("counter", res.count)
 
+                removeRows()
                 res.value
                         .sortedWith(compareBy { getDiff(it.creationDate) })
                         .reversed()
@@ -34,6 +36,12 @@ fun main() {
         setRequestHeader("Content-Type", "application/json")
         send()
     }
+    println("slept")
+}
+
+fun removeRows() {
+    val table = document.getElementById("pull-requests").asDynamic()
+    table.innerHtml = ""
 }
 
 private fun appendRow(date: String, author: String, title: String) {
