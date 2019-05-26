@@ -24,7 +24,7 @@ fun main() {
                 res.value.forEach {
                     setTextForElement("title", it.title)
                     setTextForElement("author", it.createdBy.displayName)
-                    setTextForElement("date", "Since ${getTimespan(it)}")
+                    setTextForElement("date", getTimespan(it))
                 }
 
             }

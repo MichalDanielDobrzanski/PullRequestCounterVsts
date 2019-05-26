@@ -5,3 +5,8 @@ h1, h5, h3 {
 #counter {
     font-size: 120px;
 }
+
+#date {
+    font-size: 30px;
+    color: midnightblue;
+}
