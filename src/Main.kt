@@ -15,33 +15,40 @@ fun main() {
     // from Keys.kt
     val encToken = window.btoa(":$token")
 
+    window.setInterval(
+            {
+                with(XMLHttpRequest()) {
+                    onload = {
+                        if (status == 200.toShort()) {
+                            println("Got response")
+                            val res = JSON.parse<Json4Kotlin_Base>(responseText)
+                            setTextForElement("counter", res.count)
 
-    with(XMLHttpRequest()) {
-        onload = {
-            if (status == 200.toShort()) {
-                val res = JSON.parse<Json4Kotlin_Base>(responseText)
-                setTextForElement("counter", res.count)
-
-                removeRows()
-                res.value
-                        .sortedWith(compareBy { getDiff(it.creationDate) })
-                        .reversed()
-                        .forEach {
-                            appendRow(getTimespan(it), it.createdBy.displayName, it.title)
+                            removeRows()
+                            res.value
+                                    .sortedWith(compareBy { getDiff(it.creationDate) })
+                                    .reversed()
+                                    .forEach {
+                                        appendRow(getTimespan(it), it.createdBy.displayName, it.title)
+                                    }
                         }
-            }
-        }
-        open("GET", "https://dev.azure.com/dgsit/remote_control_android/_apis/git/pullrequests?api-version=5.0")
-        setRequestHeader("Authorization", "Basic $encToken")
-        setRequestHeader("Content-Type", "application/json")
-        send()
-    }
-    println("slept")
+                    }
+                    open("GET", "https://dev.azure.com/dgsit/remote_control_android/_apis/git/pullrequests?api-version=5.0")
+                    setRequestHeader("Authorization", "Basic $encToken")
+                    setRequestHeader("Content-Type", "application/json")
+                    send()
+                }
+                println("slept")
+            },
+            60 * 1000
+    )
 }
 
 fun removeRows() {
     val table = document.getElementById("pull-requests").asDynamic()
-    table.innerHtml = ""
+    while (table.hasChildNodes()) {
+        table.removeChild(table.lastChild)
+    }
 }
 
 private fun appendRow(date: String, author: String, title: String) {
@@ -61,11 +68,13 @@ private fun getTimespan(value: Value): String {
     val min = seconds / 60
     val hours = (min / 60).toInt()
     val minInHour = (min % 60).toInt()
-    return if (hours < 24) {
-        "${hours}h ${minInHour}min"
-    } else {
-        val days = hours / 24
-        "$days days"
+    return when {
+        (min < 60) -> "${min.toInt()}min"
+        (hours < 24) -> "${hours}h ${minInHour}min"
+        else -> {
+            val days = hours / 24
+            "$days days"
+        }
     }
 }
 
