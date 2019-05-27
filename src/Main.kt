@@ -15,36 +15,39 @@ fun main() {
     // from Keys.kt
     val encToken = window.btoa(":$token")
 
+    refreshPullRequests(encToken)
     window.setInterval(
-            {
-                with(XMLHttpRequest()) {
-                    onload = {
-                        if (status == 200.toShort()) {
-                            println("Got response")
-                            val res = JSON.parse<Json4Kotlin_Base>(responseText)
-                            setTextForElement("counter", res.count)
-
-                            removeRows()
-                            res.value
-                                    .sortedWith(compareBy { getDiff(it.creationDate) })
-                                    .reversed()
-                                    .forEach {
-                                        appendRow(getTimespan(it), it.createdBy.displayName, it.title)
-                                    }
-                        }
-                    }
-                    open("GET", "https://dev.azure.com/dgsit/remote_control_android/_apis/git/pullrequests?api-version=5.0")
-                    setRequestHeader("Authorization", "Basic $encToken")
-                    setRequestHeader("Content-Type", "application/json")
-                    send()
-                }
-                println("slept")
-            },
+            { refreshPullRequests(encToken) },
             60 * 1000
     )
 }
 
-fun removeRows() {
+private fun refreshPullRequests(encToken: String) {
+    with(XMLHttpRequest()) {
+        onload = {
+            if (status == 200.toShort()) {
+                println("Got response")
+                val res = JSON.parse<Json4Kotlin_Base>(responseText)
+                setTextForElement("counter", res.count)
+
+                removeRows()
+                res.value
+                        .sortedWith(compareBy { getDiff(it.creationDate) })
+                        .reversed()
+                        .forEach {
+                            appendRow(getTimespan(it), it.createdBy.displayName, it.title)
+                        }
+            }
+        }
+        open("GET", "https://dev.azure.com/dgsit/remote_control_android/_apis/git/pullrequests?api-version=5.0")
+        setRequestHeader("Authorization", "Basic $encToken")
+        setRequestHeader("Content-Type", "application/json")
+        send()
+    }
+    println("slept")
+}
+
+private fun removeRows() {
     val table = document.getElementById("pull-requests").asDynamic()
     while (table.hasChildNodes()) {
         table.removeChild(table.lastChild)
