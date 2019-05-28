@@ -5,4 +5,7 @@ This project uses Aazure DevOps Services REST API and needs a Personal Access To
 
 # How to setup
 - Create personal access token: https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats?view=azure-devops
-- Create "Keys.kt" file with `val token = "YOUR_TOKEN_HERE"` property in it.
+- Create "Keys.kt" file with:
+  - `const val token = "YOUR_TOKEN_HERE"` property. Paste Personal Access Token there.
+  - `const val organiztion = "YOUR_ORGANIZATION"` - VSTS Organization
+  - `const val project = "YOUR_PROJECT"` - VSTS Project
