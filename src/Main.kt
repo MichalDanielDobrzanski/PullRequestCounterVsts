@@ -15,14 +15,16 @@ fun main() {
     // from Keys.kt
     val encToken = window.btoa(":$token")
 
-    refreshPullRequests(encToken)
+    refreshPullRequests(encToken, organization, project)
     window.setInterval(
-            { refreshPullRequests(encToken) },
-            60 * 1000
+            { refreshPullRequests(encToken, organization, project) },
+            REFRESH_INTERVAL_SECONDS * 1000
     )
 }
 
-private fun refreshPullRequests(encToken: String) {
+private const val REFRESH_INTERVAL_SECONDS = 60
+
+private fun refreshPullRequests(encToken: String, organization: String, project: String) {
     with(XMLHttpRequest()) {
         onload = {
             if (status == 200.toShort()) {
@@ -39,7 +41,7 @@ private fun refreshPullRequests(encToken: String) {
                         }
             }
         }
-        open("GET", "https://dev.azure.com/dgsit/remote_control_android/_apis/git/pullrequests?api-version=5.0")
+        open("GET", "https://dev.azure.com/$organization/$project/_apis/git/pullrequests?api-version=5.0")
         setRequestHeader("Authorization", "Basic $encToken")
         setRequestHeader("Content-Type", "application/json")
         send()
